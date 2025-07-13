@@ -1,4 +1,5 @@
 import { MealType } from "./Meals";
+import { currencyFormatter } from "../util/formatting";
 
 export default function Meal({ name, price, description, image }: MealType) {
   return (
@@ -8,7 +9,7 @@ export default function Meal({ name, price, description, image }: MealType) {
         <div>
           <h3>{name}</h3>
 
-          <p className="meal-item-price">{price}</p>
+          <p className="meal-item-price">{currencyFormatter.format(price)}</p>
           <p className="description">{description}</p>
         </div>
         <p className="meal-item-actions">
