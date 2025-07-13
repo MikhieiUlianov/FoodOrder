@@ -1,4 +1,4 @@
-import { MealType } from "./Meals.jsx";
+import { MealType } from "../store/cart-context.js";
 import { currencyFormatter } from "../util/formatting.jsx";
 import Button from "./UI/Button.jsx";
 

@@ -1,0 +1,116 @@
+import { createContext, ReactNode, useContext, useReducer } from "react";
+
+export type MealType = {
+  id?: string;
+  name: string;
+  price: string;
+  description: string;
+  image: string;
+  quantity: number;
+};
+
+type MealsType = {
+  meals: MealType[];
+};
+
+type CartContextState = {
+  onAdd: (meal: MealType) => void;
+  onRemove: (id: string) => void;
+} & MealsType;
+
+type CartContextProviderProps = {
+  children: ReactNode;
+};
+const initialState = { meals: [] };
+const CartContext = createContext<CartContextState | null>(null);
+
+type AddAction = {
+  type: "ADD_MEAL";
+  payload: MealType;
+};
+
+type RemoveAction = {
+  type: "REMOVE_MEAL";
+  payload: string;
+};
+type Actions = RemoveAction | AddAction;
+
+function cartReducer(state: MealsType, action: Actions) {
+  switch (action.type) {
+    case "ADD_MEAL": {
+      const existingItemIndex = state.meals.findIndex(
+        (i) => i.id === action.payload.id
+      );
+
+      let updatedMeals;
+
+      if (existingItemIndex !== -1) {
+        // Copy the current meals array
+        updatedMeals = [...state.meals];
+
+        // Get the existing item and update quantity
+        const existingItem = updatedMeals[existingItemIndex];
+
+        updatedMeals[existingItemIndex] = {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        };
+      } else {
+        // Add new meal if not exists
+        const newItem = {
+          id: action.payload.id,
+          name: action.payload.name,
+          price: action.payload.price,
+          description: action.payload.description,
+          image: action.payload.image,
+          quantity: action.payload.quantity || 1,
+        };
+
+        updatedMeals = [...state.meals, newItem];
+      }
+
+      return { meals: updatedMeals };
+    }
+
+    case "REMOVE_MEAL": {
+      const existingItemIndex = state.meals.findIndex(
+        (i) => i.id === action.payload
+      );
+
+      if (existingItemIndex === -1) return state;
+
+      let updatedMeals;
+      updatedMeals = [...state.meals];
+      let updatedMeal = updatedMeals[existingItemIndex];
+      if (updatedMeal.quantity > 1) {
+        updatedMeal = {
+          ...updatedMeal,
+          quantity: updatedMeal.quantity - 1,
+        };
+        updatedMeals[existingItemIndex] = updatedMeal;
+      } else {
+        updatedMeals = updatedMeals.filter((i) => i.id !== action.payload);
+      }
+
+      return { meals: updatedMeals };
+    }
+
+    default:
+      return state;
+  }
+}
+
+export function CartContextProvider({ children }: CartContextProviderProps) {
+  const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  const ctx: CartContextState = {
+    meals: state.meals,
+    onAdd: (meal) => {
+      dispatch({ type: "ADD_MEAL", payload: meal });
+    },
+    onRemove: (id: string) => {
+      dispatch({ type: "REMOVE_MEAL", payload: id });
+    },
+  };
+  return <CartContext.Provider value={ctx}>{children}</CartContext.Provider>;
+}
