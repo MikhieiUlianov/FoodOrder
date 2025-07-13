@@ -1,5 +1,6 @@
-import { MealType } from "./Meals";
-import { currencyFormatter } from "../util/formatting";
+import { MealType } from "./Meals.jsx";
+import { currencyFormatter } from "../util/formatting.jsx";
+import Button from "./UI/Button.jsx";
 
 export default function Meal({ name, price, description, image }: MealType) {
   return (
@@ -13,7 +14,7 @@ export default function Meal({ name, price, description, image }: MealType) {
           <p className="description">{description}</p>
         </div>
         <p className="meal-item-actions">
-          <button>Add to Cart</button>
+          <Button>Add to Cart</Button>
         </p>
       </article>
     </li>
