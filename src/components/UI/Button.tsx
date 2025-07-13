@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
+import { ComponentPropsWithoutRef, ReactNode } from "react";
 
 type ButtonProps = {
   children: ReactNode;
   textOnly?: boolean;
   className?: string;
-};
+} & ComponentPropsWithoutRef<"button">;
 
 export default function Button({
   children,

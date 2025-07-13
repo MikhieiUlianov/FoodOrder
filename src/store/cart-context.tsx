@@ -24,6 +24,16 @@ type CartContextProviderProps = {
 const initialState = { meals: [] };
 const CartContext = createContext<CartContextState | null>(null);
 
+export function useCartContext() {
+  const cartCtx = useContext(CartContext);
+
+  if (cartCtx === null) {
+    throw new Error("Cart context error occurred");
+  }
+
+  return cartCtx;
+}
+
 type AddAction = {
   type: "ADD_MEAL";
   payload: MealType;

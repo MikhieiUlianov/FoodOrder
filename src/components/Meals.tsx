@@ -22,15 +22,7 @@ export default function Meals() {
       {process === "loading" && <p>Loading...</p>}
       {process !== "loading" &&
         process !== "error" &&
-        meals.map(({ id, name, price, description, image }) => (
-          <Meal
-            key={id}
-            name={name}
-            price={price}
-            description={description}
-            image={image}
-          />
-        ))}
+        meals.map((meal) => <Meal key={meal.id} meal={meal} />)}
     </ul>
   );
 }

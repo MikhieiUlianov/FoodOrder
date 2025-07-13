@@ -1,20 +1,26 @@
-import { MealType } from "../store/cart-context.js";
+import { MealType, useCartContext } from "../store/cart-context.js";
 import { currencyFormatter } from "../util/formatting.jsx";
 import Button from "./UI/Button.jsx";
+type MealProps = {
+  meal: MealType;
+};
+export default function Meal({ meal }: MealProps) {
+  const { onAdd } = useCartContext();
 
-export default function Meal({ name, price, description, image }: MealType) {
   return (
     <li className="meal-item">
       <article>
-        <img src={`http://localhost:3000/${image}`} alt="alt for img" />
+        <img src={`http://localhost:3000/${meal.image}`} alt="alt for img" />
         <div>
-          <h3>{name}</h3>
+          <h3>{meal.name}</h3>
 
-          <p className="meal-item-price">{currencyFormatter.format(price)}</p>
-          <p className="description">{description}</p>
+          <p className="meal-item-price">
+            {currencyFormatter.format(meal.price)}
+          </p>
+          <p className="description">{meal.description}</p>
         </div>
         <p className="meal-item-actions">
-          <Button>Add to Cart</Button>
+          <Button onClick={() => onAdd(meal)}>Add to Cart</Button>
         </p>
       </article>
     </li>
