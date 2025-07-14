@@ -1,4 +1,4 @@
-import { MealType, useCartContext } from "../store/cart-context.js";
+import { MealType, useCartContext } from "../store/CartContext.js";
 import { currencyFormatter } from "../util/formatting.jsx";
 import Button from "./UI/Button.jsx";
 type MealProps = {

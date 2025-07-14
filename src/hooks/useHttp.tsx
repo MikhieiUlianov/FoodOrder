@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { MealType } from "../store/cart-context";
+import { MealType } from "../store/CartContext";
 
 type Status = "waiting" | "loading" | "error" | "success";
 export type CustomerType = {

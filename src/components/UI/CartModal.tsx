@@ -1,67 +1,48 @@
-import { useState } from "react";
+import { useContext } from "react";
 
-import { useCartContext } from "../../store/cart-context";
+import { useCartContext } from "../../store/CartContext";
 import Modal from "./Modal";
 import Button from "./Button";
 import { currencyFormatter } from "../../util/formatting";
-import FormModal from "./FormModal";
+import UserProgressContext from "../../store/UserProgressContext";
 
-type CartModalProps = {
-  setIsModalActive: (arg: boolean) => void;
-  isModalActive: boolean;
-};
-export default function CartModal({
-  isModalActive,
-  setIsModalActive,
-}: CartModalProps) {
-  const [isFormActive, setIsFormActive] = useState(false);
-
+export default function CartModal() {
   const { meals, onAdd, onRemove, mealsTotalPrice } = useCartContext();
-
-  function handleNextModalOpen() {
-    setIsFormActive(true);
-    setIsModalActive(false);
-  }
+  const { progress, setUserProgress } = useContext(UserProgressContext);
 
   return (
-    <>
-      {isFormActive && (
-        <FormModal
-          isFormActive={isFormActive}
-          setIsFormActive={setIsFormActive}
-        />
-      )}
-      <Modal isOpen={isModalActive} className="cart">
-        <h2>Your Cart</h2>
-        <ul>
-          {meals.map((meal) => (
-            <li className="cart-item" key={meal.id}>
-              <p>
-                {meal.name}-{meal.quantity}x{" "}
-                {currencyFormatter.format(meal.price)}
-              </p>
-              <p className="cart-item-actions">
-                <button onClick={() => onRemove(meal.id)}>-</button>
-                {meal.quantity}
-                <button onClick={() => onAdd(meal)}>+</button>
-              </p>
-            </li>
-          ))}
-        </ul>
-        <div className="cart-total">
-          {currencyFormatter.format(mealsTotalPrice)}
-        </div>
-        <div className="modal-actions">
-          <Button
-            textOnly
-            className="text-button"
-            onClick={() => setIsModalActive(false)}
-          >
-            Close
-          </Button>
-          <Button onClick={handleNextModalOpen}>Go to Checkout</Button>
-        </div>
-      </Modal>
-    </>
+    <Modal isOpen={progress === "cart"} className="cart">
+      <h2>Your Cart</h2>
+      <ul>
+        {meals.map((meal) => (
+          <li className="cart-item" key={meal.id}>
+            <p>
+              {meal.name}-{meal.quantity}x{" "}
+              {currencyFormatter.format(meal.price)}
+            </p>
+            <p className="cart-item-actions">
+              <button onClick={() => onRemove(meal.id)}>-</button>
+              {meal.quantity}
+              <button onClick={() => onAdd(meal)}>+</button>
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="cart-total">
+        {currencyFormatter.format(mealsTotalPrice)}
+      </div>
+      <div className="modal-actions">
+        <Button
+          textOnly
+          className="text-button"
+          onClick={() => setUserProgress("")}
+        >
+          Close
+        </Button>
+        <Button onClick={() => setUserProgress("checkout")}>
+          Go to Checkout
+        </Button>
+      </div>
+    </Modal>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useGetMeals } from "../hooks/useHttp";
 import Meal from "./Meal";
-import { MealType } from "../store/cart-context";
+import { MealType } from "../store/CartContext";
 
 export default function Meals() {
   const [meals, setMeals] = useState<MealType[]>([]);
