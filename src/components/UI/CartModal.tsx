@@ -18,6 +18,11 @@ export default function CartModal({
 
   const { meals, onAdd, onRemove, mealsTotalPrice } = useCartContext();
 
+  function handleNextModalOpen() {
+    setIsFormActive(true);
+    setIsModalActive(false);
+  }
+
   return (
     <>
       {isFormActive && (
@@ -54,7 +59,7 @@ export default function CartModal({
           >
             Close
           </Button>
-          <Button onClick={() => setIsFormActive(true)}>Go to Checkout</Button>
+          <Button onClick={handleNextModalOpen}>Go to Checkout</Button>
         </div>
       </Modal>
     </>
