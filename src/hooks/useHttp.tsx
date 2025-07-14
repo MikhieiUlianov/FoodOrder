@@ -7,11 +7,11 @@ type FormData = {
   order: {
     items: MealType[];
     customer: {
-      name: string;
-      email: string;
-      street: string;
-      "postal-code": string;
-      city: string;
+      name: string | null;
+      email: string | null;
+      street: string | null;
+      "postal-code": string | null;
+      city: string | null;
     };
   };
 };
