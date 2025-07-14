@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
-import getMeals from "../hooks/useHttp";
+import { useGetMeals } from "../hooks/useHttp";
 import Meal from "./Meal";
 import { MealType } from "../store/cart-context";
 
 export default function Meals() {
   const [meals, setMeals] = useState<MealType[]>([]);
 
-  const { process, request, setProcess, clearError } = getMeals();
+  const { process, request, setProcess, clearError } = useGetMeals();
 
   useEffect(() => {
     clearError();

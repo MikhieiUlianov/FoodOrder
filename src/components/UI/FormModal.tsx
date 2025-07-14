@@ -8,6 +8,7 @@ import { currencyFormatter } from "../../util/formatting";
 import { FormEvent } from "react";
 import { hasMinLength, isEmail, isNotEmpty } from "../../util/validation";
 import ThanksModal from "./ThanksModal";
+import { usePostFormData } from "../../hooks/useHttp";
 
 type FormModalProps = {
   isFormActive: boolean;
@@ -26,7 +27,8 @@ export default function FormModal({
   isFormActive,
   setIsFormActive,
 }: FormModalProps) {
-  const { mealsTotalPrice } = useCartContext();
+  const { clearError, request, setProcess, process } = usePostFormData();
+  const { mealsTotalPrice, meals } = useCartContext();
   const [isThanksModalActive, setIsThanksModalActive] = useState(false);
   const [errors, setErrors] = useState<Errors>({
     name: null,
@@ -36,7 +38,7 @@ export default function FormModal({
     city: null,
   });
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const data = new FormData(event.currentTarget);
@@ -44,7 +46,7 @@ export default function FormModal({
     const name = formattedData.name;
     const email = formattedData.email;
     const street = formattedData.street;
-    const code = formattedData.code;
+    const code = formattedData["postal-code"];
     const city = formattedData.city;
 
     const newErrors = {
@@ -74,15 +76,27 @@ export default function FormModal({
 
     const hasErrors = Object.values(newErrors).some((error) => error !== null);
     if (hasErrors) return;
-    console.log("Form valid, opening ThanksModal");
-
-    setIsFormActive(false); // Close FormModal
-    setIsThanksModalActive(true); // Open ThanksModal
+    clearError();
+    await request({
+      order: {
+        items: meals,
+        customer: {
+          name: String(data.get("name")),
+          email: String(data.get("email")),
+          street: String(data.get("street")),
+          "postal-code": String(data.get("postal-code")),
+          city: String(data.get("city")),
+        },
+      },
+    });
+    setProcess("success");
+    setIsFormActive(false);
+    setIsThanksModalActive(true);
   }
 
   return (
     <>
-      {isThanksModalActive && !isFormActive && (
+      {isThanksModalActive && (
         <ThanksModal
           isThanksModalActive={isThanksModalActive}
           setIsThanksModalActive={setIsThanksModalActive}
@@ -114,7 +128,7 @@ export default function FormModal({
           />
           <div className="control-row">
             <Input
-              id="code"
+              id="postal-code"
               label="Postal Code"
               type="text"
               errorMessage={errors.code}
@@ -134,7 +148,9 @@ export default function FormModal({
             >
               Close
             </Button>
-            <Button type="submit">Go to Checkout</Button>
+            <Button type="submit" disabled={process === "loading"}>
+              Go to Checkout
+            </Button>
           </div>
         </form>
       </Modal>
