@@ -35,7 +35,7 @@ export default function CartModal({
         <h2>Your Cart</h2>
         <ul>
           {meals.map((meal) => (
-            <li className="cart-item" key={meal.name}>
+            <li className="cart-item" key={meal.id}>
               <p>
                 {meal.name}-{meal.quantity}x{" "}
                 {currencyFormatter.format(meal.price)}

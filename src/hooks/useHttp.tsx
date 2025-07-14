@@ -2,17 +2,18 @@ import { useCallback, useState } from "react";
 import { MealType } from "../store/cart-context";
 
 type Status = "waiting" | "loading" | "error" | "success";
+export type CustomerType = {
+  name: string;
+  email: string;
+  street: string;
+  "postal-code": string;
+  city: string;
+};
 
 type FormData = {
   order: {
     items: MealType[];
-    customer: {
-      name: string | null;
-      email: string | null;
-      street: string | null;
-      "postal-code": string | null;
-      city: string | null;
-    };
+    customer: CustomerType;
   };
 };
 export function useGetMeals() {
