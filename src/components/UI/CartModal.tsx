@@ -4,6 +4,7 @@ import { useCartContext } from "../../store/cart-context";
 import Modal from "./Modal";
 import Button from "./Button";
 import { currencyFormatter } from "../../util/formatting";
+import FormModal from "./FormModal";
 
 type CartModalProps = {
   setIsModalActive: (arg: boolean) => void;
@@ -19,6 +20,12 @@ export default function CartModal({
 
   return (
     <>
+      {isFormActive && (
+        <FormModal
+          isFormActive={isFormActive}
+          setIsFormActive={setIsFormActive}
+        />
+      )}
       <Modal isOpen={isModalActive} className="cart">
         <h2>Your Cart</h2>
         <ul>
