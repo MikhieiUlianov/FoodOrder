@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 
 export type MealType = {
-  id?: string;
+  id: string;
   name: string;
   price: string;
   description: string;
@@ -14,6 +14,7 @@ type MealsType = {
 };
 
 type CartContextState = {
+  mealsTotalPrice: number;
   onAdd: (meal: MealType) => void;
   onRemove: (id: string) => void;
 } & MealsType;
@@ -21,7 +22,11 @@ type CartContextState = {
 type CartContextProviderProps = {
   children: ReactNode;
 };
-const initialState = { meals: [] };
+type InitialStateType = {
+  meals: MealType[];
+  mealsTotalPrice: number;
+};
+const initialState: InitialStateType = { meals: [], mealsTotalPrice: 0 };
 const CartContext = createContext<CartContextState | null>(null);
 
 export function useCartContext() {
@@ -45,7 +50,7 @@ type RemoveAction = {
 };
 type Actions = RemoveAction | AddAction;
 
-function cartReducer(state: MealsType, action: Actions) {
+function cartReducer(state: InitialStateType, action: Actions) {
   switch (action.type) {
     case "ADD_MEAL": {
       const existingItemIndex = state.meals.findIndex(
@@ -78,8 +83,12 @@ function cartReducer(state: MealsType, action: Actions) {
 
         updatedMeals = [...state.meals, newItem];
       }
+      const totalPrice = updatedMeals.reduce(
+        (sum, m) => sum + Number(m.price) * m.quantity,
+        0
+      );
 
-      return { meals: updatedMeals };
+      return { meals: updatedMeals, mealsTotalPrice: totalPrice };
     }
 
     case "REMOVE_MEAL": {
@@ -101,8 +110,11 @@ function cartReducer(state: MealsType, action: Actions) {
       } else {
         updatedMeals = updatedMeals.filter((i) => i.id !== action.payload);
       }
-
-      return { meals: updatedMeals };
+      const totalPrice = updatedMeals.reduce(
+        (sum, m) => sum + Number(m.price) * m.quantity,
+        0
+      );
+      return { meals: updatedMeals, mealsTotalPrice: totalPrice };
     }
 
     default:
@@ -114,6 +126,7 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
   const ctx: CartContextState = {
+    mealsTotalPrice: state.mealsTotalPrice,
     meals: state.meals,
     onAdd: (meal) => {
       dispatch({ type: "ADD_MEAL", payload: meal });
