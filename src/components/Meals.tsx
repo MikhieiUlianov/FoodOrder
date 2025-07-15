@@ -1,27 +1,22 @@
-import { useEffect, useState } from "react";
-
-import { useGetMeals } from "../hooks/useHttp";
+import useHttp from "../hooks/useHttp";
 import Meal from "./Meal";
 import { MealType } from "../store/CartContext";
+import { useMemo } from "react";
 
 export default function Meals() {
-  const [meals, setMeals] = useState<MealType[]>([]);
-
-  const { process, request, setProcess, clearError } = useGetMeals();
-
-  useEffect(() => {
-    clearError();
-    request()
-      .then((meals) => setMeals(meals))
-      .then(() => setProcess("success"));
-  }, []);
+  const config = useMemo(() => ({ method: "GET" }), []);
+  const {
+    error,
+    isLoading,
+    data: meals,
+  } = useHttp<MealType[]>("http://localhost:3000/meals", config, []);
 
   return (
     <ul id="meals">
-      {process === "error" && <p>Error</p>}
-      {process === "loading" && <p>Loading...</p>}
-      {process !== "loading" &&
-        process !== "error" &&
+      {error && <p>Error</p>}
+      {isLoading && <p>Loading...</p>}
+      {!error &&
+        !isLoading &&
         meals.map((meal) => <Meal key={meal.id} meal={meal} />)}
     </ul>
   );

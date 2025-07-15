@@ -17,6 +17,7 @@ type CartContextState = {
   mealsTotalPrice: number;
   onAdd: (meal: MealType) => void;
   onRemove: (id: string) => void;
+  clearCart: () => void;
 } & MealsType;
 
 type CartContextProviderProps = {
@@ -48,7 +49,11 @@ type RemoveAction = {
   type: "REMOVE_MEAL";
   payload: string;
 };
-type Actions = RemoveAction | AddAction;
+
+type ClearCart = {
+  type: "CLEAR_CART";
+};
+type Actions = RemoveAction | AddAction | ClearCart;
 
 function cartReducer(state: InitialStateType, action: Actions) {
   switch (action.type) {
@@ -117,6 +122,10 @@ function cartReducer(state: InitialStateType, action: Actions) {
       return { meals: updatedMeals, mealsTotalPrice: totalPrice };
     }
 
+    case "CLEAR_CART": {
+      return { meals: [], mealsTotalPrice: 0 };
+    }
+
     default:
       return state;
   }
@@ -128,12 +137,9 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
   const ctx: CartContextState = {
     mealsTotalPrice: state.mealsTotalPrice,
     meals: state.meals,
-    onAdd: (meal) => {
-      dispatch({ type: "ADD_MEAL", payload: meal });
-    },
-    onRemove: (id: string) => {
-      dispatch({ type: "REMOVE_MEAL", payload: id });
-    },
+    onAdd: (meal) => dispatch({ type: "ADD_MEAL", payload: meal }),
+    onRemove: (id: string) => dispatch({ type: "REMOVE_MEAL", payload: id }),
+    clearCart: () => dispatch({ type: "CLEAR_CART" }),
   };
   return <CartContext.Provider value={ctx}>{children}</CartContext.Provider>;
 }

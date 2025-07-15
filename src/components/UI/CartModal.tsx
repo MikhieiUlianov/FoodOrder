@@ -39,9 +39,11 @@ export default function CartModal() {
         >
           Close
         </Button>
-        <Button onClick={() => setUserProgress("checkout")}>
-          Go to Checkout
-        </Button>
+        {meals.length > 0 && (
+          <Button onClick={() => setUserProgress("checkout")}>
+            Go to Checkout
+          </Button>
+        )}
       </div>
     </Modal>
   );

@@ -9,7 +9,7 @@ export default function ThanksModal() {
     <Modal isOpen={progress === "thanks"}>
       <h2>Success!</h2>
       <p>Your order was submitted successfully.</p>
-      <p>We will get back you with more details via email next few mminutes.</p>
+      <p>We will get back you with more details via email next few minutes.</p>
       <Button onClick={() => setUserProgress("")}>Okay</Button>
     </Modal>
   );

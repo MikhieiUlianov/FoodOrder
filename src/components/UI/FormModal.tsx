@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import UserProgressContext from "../../store/UserProgressContext";
@@ -7,40 +7,49 @@ import Input from "./Input";
 import Modal from "./Modal";
 import Button from "./Button";
 import { currencyFormatter } from "../../util/formatting";
-import { CustomerType, usePostFormData } from "../../hooks/useHttp";
+import useHttp, { CustomerType } from "../../hooks/useHttp";
 
 export default function FormModal() {
-  const { clearError, request, setProcess, process } = usePostFormData();
-  const { mealsTotalPrice, meals } = useCartContext();
+  const { mealsTotalPrice, meals, clearCart } = useCartContext();
+  const { progress, setUserProgress } = useContext(UserProgressContext);
+
   const {
     handleSubmit,
     formState: { errors },
     reset,
     register,
   } = useForm<CustomerType>();
-  const { progress, setUserProgress } = useContext(UserProgressContext);
+
+  // Memoized config to prevent infinite loop
+  const config = useMemo(
+    () => ({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }),
+    []
+  );
+
+  const { sendRequest, isLoading, clearData, error } = useHttp(
+    "http://localhost:3000/orders",
+    config,
+    null
+  );
 
   async function submitFormData(formData: CustomerType) {
     const formattedData = {
       order: {
         items: meals,
-        customer: {
-          name: formData.name,
-          email: formData.email,
-          street: formData.street,
-          "postal-code": formData["postal-code"],
-          city: formData.city,
-        },
+        customer: formData,
       },
     };
-    clearError();
-    await request(formattedData);
-    console.log(formattedData);
-    setProcess("success");
 
+    clearData();
+    await sendRequest(formattedData);
     setUserProgress("thanks");
+    clearCart();
     reset();
   }
+
   return (
     <Modal isOpen={progress === "checkout"}>
       <div>
@@ -56,8 +65,9 @@ export default function FormModal() {
             required: "The name must have at least 6 characters",
             minLength: 6,
           })}
-        />{" "}
+        />
         {errors.name && <p className="error">{errors.name.message}</p>}
+
         <Input
           id="email"
           label="E-Mail Address"
@@ -71,6 +81,7 @@ export default function FormModal() {
           })}
         />
         {errors.email && <p className="error">{errors.email.message}</p>}
+
         <Input
           id="street"
           label="Street"
@@ -81,6 +92,7 @@ export default function FormModal() {
           })}
         />
         {errors.street && <p className="error">{errors.street.message}</p>}
+
         <div className="control-row">
           <Input
             id="postal-code"
@@ -90,10 +102,7 @@ export default function FormModal() {
               required: "The code must have at least 6 characters",
               minLength: 6,
             })}
-          />{" "}
-          {errors["postal-code"] && (
-            <p className="error">{errors["postal-code"].message}</p>
-          )}
+          />
           <Input
             id="city"
             label="City"
@@ -102,18 +111,28 @@ export default function FormModal() {
               required: "The city must have at least 3 characters",
               minLength: 3,
             })}
-          />{" "}
-          {errors.city && <p className="error">{errors.city.message}</p>}
+          />
         </div>
+        {errors["postal-code"] && (
+          <p className="error">{errors["postal-code"].message}</p>
+        )}
+        {errors.city && <p className="error">{errors.city.message}</p>}
+        {error && (
+          <div className="error">
+            <h2>Failed to submit order</h2>
+            <p>try again.</p>
+          </div>
+        )}
         <div className="modal-actions">
           <Button
             textOnly
             className="text-button"
+            type="button"
             onClick={() => setUserProgress("")}
           >
             Close
           </Button>
-          <Button type="submit" disabled={process === "loading"}>
+          <Button type="submit" disabled={isLoading}>
             Go to Checkout
           </Button>
         </div>

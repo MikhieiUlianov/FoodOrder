@@ -1,7 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MealType } from "../store/CartContext";
 
-type Status = "waiting" | "loading" | "error" | "success";
+// Define payload shape
 export type CustomerType = {
   name: string;
   email: string;
@@ -10,66 +10,84 @@ export type CustomerType = {
   city: string;
 };
 
-type FormData = {
+type OrderPayload = {
   order: {
     items: MealType[];
     customer: CustomerType;
   };
 };
-export function useGetMeals() {
-  const [process, setProcess] = useState<Status>("waiting");
 
-  const request = useCallback(async () => {
-    setProcess("loading");
-    try {
-      const response = await fetch("http://localhost:3000/meals");
+type Config = {
+  method: string;
+  body?: OrderPayload; // body is optional, especially for GET
+  headers?: Record<string, string>;
+};
 
-      if (!response.ok) {
-        throw new Error("Fetching error");
-      }
+// Generic response type for useHttp
+async function sendHttpRequest<T = unknown>(
+  url: string,
+  config: Config
+): Promise<T> {
+  const response = await fetch(url, {
+    method: config.method,
+    headers: config.headers,
+    body: config.body ? JSON.stringify(config.body) : undefined,
+  });
 
-      const data = await response.json();
+  const resData = await response.json();
 
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
-  function clearError() {
-    setProcess("waiting");
+  if (!response.ok) {
+    throw new Error(
+      resData.message || "Something went wrong, failed to send request."
+    );
   }
 
-  return { request, process, setProcess, clearError };
+  return resData;
 }
 
-export function usePostFormData() {
-  const [process, setProcess] = useState<Status>("waiting");
+// Hook with generic <T> for response type
+export default function useHttp<T>(
+  url: string,
+  config: Config,
+  initialData: T
+) {
+  const [data, setData] = useState<T>(initialData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const request = useCallback(async (formData: FormData) => {
-    setProcess("loading");
-    try {
-      const response = await fetch("http://localhost:3000/orders", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        throw new Error("Fetching error");
-      }
-
-      const data = await response.json();
-
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
-  function clearError() {
-    setProcess("waiting");
+  function clearData() {
+    setData(initialData);
   }
 
-  return { request, process, setProcess, clearError };
+  const sendRequest = useCallback(
+    async (payload?: OrderPayload) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const resData = await sendHttpRequest<T>(url, {
+          ...config,
+          body: payload, // payload is passed in here
+        });
+        setData(resData);
+      } catch (err: any) {
+        setError(err.message || "Something went wrong!");
+      }
+      setIsLoading(false);
+    },
+    [url, config]
+  );
+
+  useEffect(() => {
+    if (!config.body && config.method === "GET") {
+      sendRequest();
+    }
+  }, [sendRequest, config]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    sendRequest,
+    clearData,
+  };
 }

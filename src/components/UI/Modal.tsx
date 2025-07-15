@@ -1,5 +1,6 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useContext, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import UserProgressContext from "../../store/UserProgressContext";
 
 type ModalProps = { children: ReactNode; isOpen: boolean; className?: string };
 
@@ -10,6 +11,8 @@ export default function Modal({
 }: ModalProps) {
   const modal = useRef<HTMLDialogElement | null>(null);
 
+  const { setUserProgress } = useContext(UserProgressContext);
+
   useEffect(() => {
     if (isOpen) {
       modal.current?.showModal();
@@ -19,7 +22,11 @@ export default function Modal({
   }, [isOpen]);
 
   return createPortal(
-    <dialog ref={modal} className={`modal ${className}`}>
+    <dialog
+      ref={modal}
+      className={`modal ${className}`}
+      onClose={() => setUserProgress("")}
+    >
       {children}
     </dialog>,
     document.getElementById("modal")!
